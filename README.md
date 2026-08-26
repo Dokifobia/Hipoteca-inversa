@@ -1,95 +1,126 @@
-# Simulador de Hipoteca Inversa
+# Hipoteca Inversa
 
-Se requiere una aplicación que calcule la cuota mensual que el banco pagaría a una persona que tome una hipoteca inversa, entregando su inmueble en garantía a cambio de una renta mensual durante un plazo pactado.
+Aplicación de consola en Python para simular el cálculo de una **hipoteca inversa**, siguiendo principios de código limpio y arquitectura por capas (Modelo - Vista - Controlador).
 
-El proyecto surge de una entrevista con un experto en el tema (grabada en audio como evidencia académica, (`EntrevistaJuanDavid.mp3`), de la cual se extrajeron las variables de entrada, las variables de salida, la fórmula financiera y las reglas de negocio que rigen el cálculo.
-
-## Descripción del problema
-
-En una hipoteca inversa, el banco no le presta dinero a la persona para que ella pague cuotas, sino todo lo contrario: el banco le entrega una cuota mensual al propietario a cambio de quedarse con el derecho de cobro sobre el inmueble. El banco no hipoteca el 100% del valor del inmueble, sino solo un porcentaje de desembolso, para garantizar que pueda recuperar el capital entregado más los intereses causados durante todo el plazo.
-
-## Variables de entrada
-
-| Variable | Descripción | Restricción |
-|---|---|---|
-| Valor del inmueble | Valor comercial del inmueble | Debe ser mayor a 0 |
-| % de desembolso | Porcentaje del valor del inmueble que el banco reconoce como base para hipotecar | Entre 0% y 100% |
-| Tasa de interés mensual | Tasa pactada para el cálculo de la cuota | No puede superar el 4% mensual (tope de referencia del ejercicio) |
-| Plazo en meses | Duración de la renta periódica | Entre 1 y 240 meses |
-
-## Variables de salida
-
-- **Valor efectivo**: valor del inmueble multiplicado por el porcentaje de desembolso (base real sobre la que se calcula la cuota).
-- **Cuota mensual**: dinero que el banco paga al propietario cada mes.
-- **Total abonos**: suma de todas las cuotas mensuales durante el plazo.
-- **Total intereses**: diferencia entre el total de abonos y el valor efectivo hipotecado.
-
-## Fórmula utilizada
-
-La cuota mensual se calcula con la fórmula de anualidad, aplicada de forma inversa a como se usa en un crédito tradicional:
+## Estructura del proyecto
 
 ```
-Cuota = Valor_efectivo * i / (1 - (1 + i) ** -n)
+Hipoteca-inversa/
+├── doc/
+│   ├── EntrevistaJuanDavid.mp3      # Entrevista de levantamiento de requisitos
+│   └── casos_de_prueba.xlsx         # Casos de prueba documentados
+├── src/
+│   ├── controller/
+│   │   └── __init__.py              # Orquesta la comunicación entre view y model
+│   ├── model/
+│   │   ├── __init__.py
+│   │   └── logica_hipoteca_inversa.py  # Lógica de negocio y cálculos financieros
+│   └── view/
+│       ├── __init__.py
+│       └── console.py               # Interfaz de consola (entrada/salida de datos)
+├── tests/
+│   ├── __init__.py
+│   └── tests_hipoteca_inversa.py    # Pruebas unitarias de la lógica de negocio
+├── .gitignore
+├── LICENSE
+└── README.md
 ```
 
-Donde `i` es la tasa de interés mensual y `n` es el plazo en meses. Cuando la tasa es 0% (promociones de "tasa cero"), la cuota se calcula como el valor efectivo dividido entre el número de meses.
+### Descripción de la arquitectura
 
-## Reglas de negocio (validaciones)
+El proyecto sigue una separación de responsabilidades tipo **MVC**:
 
-1. El valor del inmueble debe ser mayor que cero.
-2. La tasa de interés mensual no puede superar el 4% mensual (tope de referencia del ejercicio).
-3. El plazo en meses debe estar entre 1 y 240; valores en cero, negativos o mayores al límite se rechazan.
+- **`model`**: contiene toda la lógica de cálculo de la hipoteca inversa (validaciones, fórmulas financieras, reglas de negocio y excepciones propias del dominio). No depende de cómo se muestren los datos.
+- **`view`**: expone la interfaz de consola (`console.py`), encargada de solicitar datos al usuario y mostrar resultados. No contiene lógica de negocio.
+- **`controller`**: actúa como intermediario entre `view` y `model`, coordinando el flujo de la aplicación sin mezclar responsabilidades de cálculo ni de presentación.
+- **`tests`**: pruebas unitarias que validan el comportamiento de `model`, incluyendo casos válidos, casos límite y manejo de excepciones.
+- **`doc`**: soporte documental del proyecto (entrevista de requisitos y casos de prueba).
 
-> **Nota:** la tasa máxima (4%) y el plazo máximo (240 meses) son supuestos de trabajo definidos para este ejercicio académico, no cifras oficiales confirmadas por una entidad reguladora. Sirven como valores de referencia razonables para las pruebas, y quedan sujetos a lo que confirme la entrevista con el experto.
+## Funcionalidades
 
-## Casos de prueba
+La lógica de negocio (`src/model/logica_hipoteca_inversa.py`) expone la función `desembolso_mensual(valor_inmueble, porcentaje, tasa_mensual, plazo_meses)`, que calcula, usando la fórmula de anualidad financiera:
 
-El proyecto incluye 10 casos de prueba construidos a partir de la entrevista con el experto: 3 normales, 3 extraordinarios y 4 de error. Están documentados en el libro de Excel `casos_de_prueba.xlsx` y automatizados como pruebas unitarias en `Tests_Hipoteca_Inversa.py`.
+- **Cuota mensual**: el valor que el banco pagaría mensualmente al propietario.
+- **Abonos totales**: la suma de todas las cuotas pagadas durante el plazo.
+- **Intereses totales**: la diferencia entre los abonos totales y el valor financiado del inmueble.
 
-| # | Caso | Plazo | Detalle |
-|---|------|-------|---------|
-| 1-3 | Normales | 48-120 meses | Combinaciones válidas dentro de rangos normales |
-| 4 | Extraordinario (tasa cero) | 36 meses | Promoción sin interés |
-| 5 | Extraordinario (única disposición) | 1 mes | Pago único |
-| 6 | Extraordinario (plazo máximo) | 240 meses | Límite superior del rango permitido |
-| 7-10 | Error | — | Valor en cero, tasa que supera el 4%, plazo en cero, plazo negativo |
+Si la tasa mensual es `0`, el cálculo usa una división simple del valor financiado entre el número de meses, evitando la indeterminación de la fórmula de anualidad.
+
+### Reglas de negocio y validaciones
+
+La función valida los datos de entrada y lanza una excepción específica por cada regla incumplida:
+
+| Excepción | Condición que la dispara |
+|---|---|
+| `ValorPropiedad0` | El valor del inmueble es menor o igual a 0 |
+| `HipotecaUsura` | La tasa mensual supera el 4% (límite de usura) |
+| `PlazoMayor240` | El plazo excede los 240 meses (20 años) |
+| `PlazoMenorIgual0` | El plazo es menor o igual a 0 meses |
+
+### Pruebas unitarias
+
+`tests/tests_hipoteca_inversa.py` valida el comportamiento de `desembolso_mensual` con:
+
+- 3 casos normales con distintos valores de inmueble, porcentaje, tasa y plazo.
+- 3 casos extraordinarios: tasa mensual en cero, desembolso único a 1 mes con 100% de financiación, y plazo máximo permitido (240 meses).
+- 4 casos de error, uno por cada excepción de negocio (`ValorPropiedad0`, `HipotecaUsura`, `PlazoMenorIgual0`, `PlazoMayor240`).
 
 ## Requisitos
 
-- Python 3.10 o superior (el proyecto usa `unittest`, incluido en la librería estándar; no requiere instalar dependencias externas)
+- Python 3.10 o superior
+- No se requieren dependencias externas (usa únicamente la librería estándar de Python)
 
-## Instalación
+Puedes verificar tu versión de Python con:
 
 ```bash
-git clone https://github.com/Jose-Dv/Hipoteca-inversa
+python --version
+```
+
+## Cómo ejecutar el proyecto
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/Jose-Dv/Hipoteca-inversa.git
+```
+
+### 2. Ubicarse en la carpeta del proyecto
+
+```bash
 cd Hipoteca-inversa
 ```
 
-## Uso
+### 3. Ejecutar la interfaz de consola
 
 ```bash
-python main.py
+python src/view/console.py
 ```
 
-El programa solicita el valor del inmueble, el porcentaje de desembolso, la tasa de interés mensual y el plazo en meses, y devuelve el valor efectivo, la cuota mensual, el total de abonos y el total de intereses, o el mensaje de error correspondiente si algún dato viola una regla de negocio.
+Esto iniciará la aplicación en modo consola, donde podrás ingresar los datos solicitados (valor del inmueble, porcentaje de financiación, tasa de interés mensual y plazo en meses) para obtener la cuota mensual, los abonos totales y los intereses totales de la hipoteca inversa.
 
-## Pruebas
+### 4. Ejecutar las pruebas unitarias
+
+Desde la raíz del proyecto:
 
 ```bash
-python -m unittest Tests_Hipoteca_Inversa -v
+python -m unittest tests/tests_hipoteca_inversa.py
 ```
 
-Los 10 casos de prueba (3 normales, 3 extraordinarios, 4 de error) están automatizados con `unittest` y todos pasan exitosamente sobre la lógica implementada en `Logica_Hipoteca_Inversa.py`.
+O bien, si prefieres ejecutar todas las pruebas del proyecto automáticamente:
 
+```bash
+python -m unittest discover -s tests
+```
 
-## Metodología
+Un resultado exitoso mostrará algo similar a:
 
-1. Se realizó una entrevista grabada (audio) con un experto en hipoteca inversa para identificar variables de entrada, variables de salida y la fórmula de cálculo.
-2. Con esa información se construyó el libro de Excel con los 10 casos de prueba (3 normales, 3 extraordinarios, 4 de error).
-3. Se implementó la lógica de negocio en Python siguiendo la fórmula y las reglas de validación definidas para el ejercicio.
-4. Se automatizaron los 10 casos de prueba como tests unitarios con `unittest` para verificar que el aplicativo cumple lo esperado.
+```
+----------------------------------------------------------------------
+Ran 10 tests in 0.00Xs
 
-## Autores
+OK
+```
 
-Sebastian Velasquez y
-Jose Diaz
+## Licencia
+
+Este proyecto se distribuye bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
