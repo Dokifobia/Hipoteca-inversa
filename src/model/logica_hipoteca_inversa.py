@@ -1,54 +1,72 @@
-#Exepciones de el aplicativo
-
-class ValorPropiedad0(Exception):
-    """exepcion que se dispara cuando el valor de la propiedad es 0"""
+# excepciones personalizadas para la logica de hipoteca inversa
+class ValorPropiedadCero(Exception):
+    """Se dispara cuando el valor de la propiedad es 0."""
     pass
 
 
 class HipotecaUsura(Exception):
-    """exepcion que se dispara cuando el porcentaje de la tasa supera el 4%"""
+    """Se dispara cuando la tasa mensual supera el límite permitido."""
     pass
 
 
-class PlazoMayor240(Exception):
-    """exepcion que se dispara cuando el plazo de meses es mayor a 240"""
+class PlazoMayorPermitido(Exception):
+    """Se dispara cuando el plazo de meses es mayor al máximo permitido."""
     pass
 
 
-class PlazoMenorIgual0(Exception):
-    """exepcion que se dispara cuando el plazo de meses es menor igual a 0"""
+class PlazoMenorIgualCero(Exception):
+    """Se dispara cuando el plazo de meses es menor o igual a 0."""
     pass
 
 
-# Aqui se encuentra la logica de el proyecto "Calculadora de Hipoteca Inversa"
 
-def desembolso_mensual(valor_inmueble: float, porcentaje: float, tasa_mensual: float, plazo_meses: int):
-    """ Calcula la cuota mensual que el banco le pagaría a una persona que toma una hipoteca inversa,
-    usando como base un porcentaje del valor del inmueble y la fórmula de anualidad. """
-    
-    if valor_inmueble <= 0:
-        raise ValorPropiedad0("Valor del inmueble invalido: debe ser mayor que cero")
+# Constantes de negocio (valores inmutables)
+TASA_MAXIMA_USURA: float = 0.04
+PLAZO_MAXIMO_MESES: int = 240
+PLAZO_MINIMO_MESES: int = 1
 
-    if tasa_mensual > 0.04:
-        raise HipotecaUsura("Tasa mensual invalida: supera el maximo de usura permitido (4%)")
-
-    if plazo_meses > 240:
-        raise PlazoMayor240("Plazo invalido: el numero de meses no debe ser mayor a 240")
-
-    if plazo_meses <= 0:
-        raise PlazoMenorIgual0("Plazo invalido: el numero de meses debe estar entre 1 y 240")
+# logica hipoteca inversa
+def desembolso_mensual(
+    valor_inmueble: float,
+    porcentaje: float,
+    tasa_mensual: float,
+    plazo_meses: int
+) -> tuple[float, float, float]:
 
 
-    V = valor_inmueble * porcentaje
-    i = tasa_mensual
-    n = plazo_meses
+    validar_parametros(valor_inmueble, tasa_mensual, plazo_meses)
 
-    if i == 0:
-        cuota = V / n
+    monto_prestamo = valor_inmueble * porcentaje
+    tasa = tasa_mensual
+    plazo = plazo_meses
+
+    if tasa == 0:
+        cuota_mensual = monto_prestamo / plazo
     else:
-        cuota = V * i / (1 - (1 + i) ** -n)
+        cuota_mensual = (monto_prestamo * tasa) / (1 - (1 + tasa) ** -plazo)
 
-    abonos = cuota * n
-    intereses = abonos - V
+    total_abonos = cuota_mensual * plazo
+    total_intereses = total_abonos - monto_prestamo
 
-    return cuota, abonos, intereses
+    return cuota_mensual, total_abonos, total_intereses
+
+
+def validar_parametros(valor_inmueble: float, tasa_mensual: float, plazo_meses: int) -> None:
+
+    if valor_inmueble <= 0:
+        raise ValorPropiedadCero("El valor del inmueble debe ser mayor que cero.")
+
+    if tasa_mensual > TASA_MAXIMA_USURA:
+        raise HipotecaUsura(
+            f"La tasa mensual supera el máximo permitido ({TASA_MAXIMA_USURA*100:.0f}%)."
+        )
+
+    if plazo_meses > PLAZO_MAXIMO_MESES:
+        raise PlazoMayorPermitido(
+            f"El plazo no debe ser mayor a {PLAZO_MAXIMO_MESES} meses."
+        )
+
+    if plazo_meses < PLAZO_MINIMO_MESES:
+        raise PlazoMenorIgualCero(
+            f"El plazo debe estar entre {PLAZO_MINIMO_MESES} y {PLAZO_MAXIMO_MESES} meses."
+        )
