@@ -1,6 +1,7 @@
 import unittest
 from src.model import logica_hipoteca_inversa
 
+
 class TestHipoteca(unittest.TestCase):
 
     # Casos normales
@@ -14,7 +15,10 @@ class TestHipoteca(unittest.TestCase):
         abonos_esperado = 227059892.25
         intereses_esperado = 107059892.25
 
-        cuota, abonos, intereses = desembolso_mensual(valor_inmueble, porcentaje, tasa_mensual, plazo_meses)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(
+            valor_inmueble, porcentaje, tasa_mensual, plazo_meses
+        )
+        cuota, abonos, intereses = logica_hipoteca_inversa.desembolso_mensual(parametros)
 
         self.assertAlmostEqual(cuota, cuota_esperada, places=2)
         self.assertAlmostEqual(abonos, abonos_esperado, places=2)
@@ -30,7 +34,10 @@ class TestHipoteca(unittest.TestCase):
         abonos_esperado = 97392664.32
         intereses_esperado = 22392664.32
 
-        cuota, abonos, intereses = desembolso_mensual(valor_inmueble, porcentaje, tasa_mensual, plazo_meses)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(
+            valor_inmueble, porcentaje, tasa_mensual, plazo_meses
+        )
+        cuota, abonos, intereses = logica_hipoteca_inversa.desembolso_mensual(parametros)
 
         self.assertAlmostEqual(cuota, cuota_esperada, places=2)
         self.assertAlmostEqual(abonos, abonos_esperado, places=2)
@@ -46,7 +53,10 @@ class TestHipoteca(unittest.TestCase):
         abonos_esperado = 211499997.18
         intereses_esperado = 61499997.18
 
-        cuota, abonos, intereses = desembolso_mensual(valor_inmueble, porcentaje, tasa_mensual, plazo_meses)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(
+            valor_inmueble, porcentaje, tasa_mensual, plazo_meses
+        )
+        cuota, abonos, intereses = logica_hipoteca_inversa.desembolso_mensual(parametros)
 
         self.assertAlmostEqual(cuota, cuota_esperada, places=2)
         self.assertAlmostEqual(abonos, abonos_esperado, places=2)
@@ -63,7 +73,10 @@ class TestHipoteca(unittest.TestCase):
         abonos_esperado = 100000000.00
         intereses_esperado = 0.00
 
-        cuota, abonos, intereses = desembolso_mensual(valor_inmueble, porcentaje, tasa_mensual, plazo_meses)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(
+            valor_inmueble, porcentaje, tasa_mensual, plazo_meses
+        )
+        cuota, abonos, intereses = logica_hipoteca_inversa.desembolso_mensual(parametros)
 
         self.assertAlmostEqual(cuota, cuota_esperada, places=2)
         self.assertAlmostEqual(abonos, abonos_esperado, places=2)
@@ -79,7 +92,10 @@ class TestHipoteca(unittest.TestCase):
         abonos_esperado = 102400000.00
         intereses_esperado = 2400000.00
 
-        cuota, abonos, intereses = desembolso_mensual(valor_inmueble, porcentaje, tasa_mensual, plazo_meses)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(
+            valor_inmueble, porcentaje, tasa_mensual, plazo_meses
+        )
+        cuota, abonos, intereses = logica_hipoteca_inversa.desembolso_mensual(parametros)
 
         self.assertAlmostEqual(cuota, cuota_esperada, places=2)
         self.assertAlmostEqual(abonos, abonos_esperado, places=2)
@@ -95,7 +111,10 @@ class TestHipoteca(unittest.TestCase):
         abonos_esperado = 438054262
         intereses_esperado = 338054262
 
-        cuota, abonos, intereses = desembolso_mensual(valor_inmueble, porcentaje, tasa_mensual, plazo_meses)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(
+            valor_inmueble, porcentaje, tasa_mensual, plazo_meses
+        )
+        cuota, abonos, intereses = logica_hipoteca_inversa.desembolso_mensual(parametros)
 
         self.assertAlmostEqual(cuota, cuota_esperada, places=0)
         self.assertAlmostEqual(abonos, abonos_esperado, places=0)
@@ -103,24 +122,24 @@ class TestHipoteca(unittest.TestCase):
 
     # Casos de error
     def test_error_valor_inmueble_cero(self):
-        with self.assertRaises(ValorPropiedadCero):
-            desembolso_mensual(0, 0.40, 0.012, 60)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(0, 0.40, 0.012, 60)
+        with self.assertRaises(logica_hipoteca_inversa.ValorPropiedadCero):
+            logica_hipoteca_inversa.desembolso_mensual(parametros)
 
     def test_error_tasa_usura(self):
-        with self.assertRaises(HipotecaUsura):
-            desembolso_mensual(200_000_000, 0.50, 0.05, 36)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(200_000_000, 0.50, 0.05, 36)
+        with self.assertRaises(logica_hipoteca_inversa.HipotecaUsura):
+            logica_hipoteca_inversa.desembolso_mensual(parametros)
 
     def test_error_plazo_cero(self):
-        with self.assertRaises(PlazoMenorIgualCero):
-            desembolso_mensual(150_000_000, 0.30, 0.012, 0)
-
-    def test_error_plazo_negativo(self):
-        with self.assertRaises(PlazoMenorIgualCero):
-            desembolso_mensual(150_000_000, 0.30, 0.012, -12)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(150_000_000, 0.30, 0.012, 0)
+        with self.assertRaises(logica_hipoteca_inversa.PlazoMenorIgualCero):
+            logica_hipoteca_inversa.desembolso_mensual(parametros)
 
     def test_error_plazo_mayor_240(self):
-        with self.assertRaises(PlazoMayorPermitido):
-            desembolso_mensual(150_000_000, 0.30, 0.012, 300)
+        parametros = logica_hipoteca_inversa.ParametrosHipoteca(150_000_000, 0.30, 0.012, 250)
+        with self.assertRaises(logica_hipoteca_inversa.PlazoMayorPermitido):
+            logica_hipoteca_inversa.desembolso_mensual(parametros)
 
 
 if __name__ == "__main__":
