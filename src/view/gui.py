@@ -11,9 +11,10 @@ from src.model.logica_hipoteca_inversa import (
     ParametrosHipoteca,
     HipotecaInversaError,
     desembolso_mensual,
+    calcular_monto_prestamo,
 )
 
-Window.size = (480, 480)
+Window.size = (480, 520)
 
 TITULO_ERROR_VALIDACION = "Error de validación"
 TITULO_ERROR_DATOS = "Datos inválidos"
@@ -26,7 +27,7 @@ class HipotecaInversaApp(App):
     def build(self) -> BoxLayout:
         raiz = BoxLayout(orientation="vertical", padding=20, spacing=15)
 
-        encabezado = BoxLayout(orientation="horizontal", size_hint=(1, 0.15))
+        encabezado = BoxLayout(orientation="horizontal", size_hint=(1, 0.13))
 
         titulo = Label(
             text="HIPOTECA INVERSA",
@@ -51,7 +52,7 @@ class HipotecaInversaApp(App):
         encabezado.add_widget(instruccion)
         raiz.add_widget(encabezado)
 
-        formulario = GridLayout(cols=2, spacing=10, size_hint=(1, 0.55))
+        formulario = GridLayout(cols=2, spacing=10, size_hint=(1, 0.45))
 
         self.input_valor_inmueble = self._agregar_campo(formulario, "Valor del inmueble:")
         self.input_porcentaje = self._agregar_campo(formulario, "Porcentaje a prestar (0-1):")
@@ -60,7 +61,11 @@ class HipotecaInversaApp(App):
 
         raiz.add_widget(formulario)
 
-        resultados = GridLayout(cols=2, spacing=10, size_hint=(1, 0.25))
+        resultados = GridLayout(cols=2, spacing=10, size_hint=(1, 0.3))
+
+        resultados.add_widget(Label(text="Monto del préstamo:", bold=True))
+        self.label_monto_prestamo = Label(text="$ 0.00")
+        resultados.add_widget(self.label_monto_prestamo)
 
         resultados.add_widget(Label(text="Cuota mensual:", bold=True))
         self.label_cuota = Label(text="$ 0.00")
@@ -76,9 +81,17 @@ class HipotecaInversaApp(App):
 
         raiz.add_widget(resultados)
 
-        boton_calcular = Button(text="Calcular", size_hint=(1, 0.15))
+        botones = BoxLayout(orientation="horizontal", size_hint=(1, 0.12), spacing=10)
+
+        boton_calcular = Button(text="Calcular")
         boton_calcular.bind(on_press=self.calcular)
-        raiz.add_widget(boton_calcular)
+        botones.add_widget(boton_calcular)
+
+        boton_limpiar = Button(text="Limpiar")
+        boton_limpiar.bind(on_press=self.limpiar)
+        botones.add_widget(boton_limpiar)
+
+        raiz.add_widget(botones)
 
         return raiz
 
@@ -102,8 +115,9 @@ class HipotecaInversaApp(App):
     def calcular(self, instance: Button) -> None:
         try:
             parametros = self._leer_datos()
+            monto_prestamo = calcular_monto_prestamo(parametros)
             cuota, total_abonos, total_intereses = desembolso_mensual(parametros)
-            self._mostrar_resultado(cuota, total_abonos, total_intereses)
+            self._mostrar_resultado(monto_prestamo, cuota, total_abonos, total_intereses)
 
         except HipotecaInversaError as error:
             self._mostrar_error(TITULO_ERROR_VALIDACION, str(error))
@@ -128,6 +142,16 @@ class HipotecaInversaApp(App):
             )
             self._mostrar_error(TITULO_ERROR_INESPERADO, mensaje)
 
+    def limpiar(self, instance: Button) -> None:
+        self.input_valor_inmueble.text = ""
+        self.input_porcentaje.text = ""
+        self.input_tasa_mensual.text = ""
+        self.input_plazo_meses.text = ""
+        self.label_monto_prestamo.text = "$ 0.00"
+        self.label_cuota.text = "$ 0.00"
+        self.label_total_abonos.text = "$ 0.00"
+        self.label_total_intereses.text = "$ 0.00"
+
     def _leer_datos(self) -> ParametrosHipoteca:
         valor_inmueble = float(self.input_valor_inmueble.text)
         porcentaje = float(self.input_porcentaje.text)
@@ -141,7 +165,10 @@ class HipotecaInversaApp(App):
             plazo_meses=plazo_meses,
         )
 
-    def _mostrar_resultado(self, cuota: float, total_abonos: float, total_intereses: float) -> None:
+    def _mostrar_resultado(
+        self, monto_prestamo: float, cuota: float, total_abonos: float, total_intereses: float
+    ) -> None:
+        self.label_monto_prestamo.text = f"$ {monto_prestamo:,.2f}"
         self.label_cuota.text = f"$ {cuota:,.2f}"
         self.label_total_abonos.text = f"$ {total_abonos:,.2f}"
         self.label_total_intereses.text = f"$ {total_intereses:,.2f}"
