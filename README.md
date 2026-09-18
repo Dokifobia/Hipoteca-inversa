@@ -75,79 +75,53 @@ Puedes verificar tu versión de Python con:
 ```bash
 python --version
 ```
+## Integrantes
+
+- Juan Sebastián Leal Suárez
 
 ## Cómo ejecutar el proyecto
 
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/Jose-Dv/Hipoteca-inversa.git
-```
-
-### 2. Ubicarse en la carpeta del proyecto
-
-```bash
+git clone https://github.com/Dokifobia/Hipoteca-inversa.git
 cd Hipoteca-inversa
 ```
 
-### 3. Ejecutar la interfaz de consola
-
-```bash
-python src/view/console.py
-```
-
-Esto iniciará la aplicación en modo consola, donde podrás ingresar los datos solicitados (valor del inmueble, porcentaje de financiación, tasa de interés mensual y plazo en meses) para obtener la cuota mensual, los abonos totales y los intereses totales de la hipoteca inversa.
-
-### 4. Ejecutar las pruebas unitarias
-
-Desde la raíz del proyecto:
-
-```bash
-python -m unittest tests/tests_hipoteca_inversa.py
-```
-
-O bien, si prefieres ejecutar todas las pruebas del proyecto automáticamente:
-
-```bash
-python -m unittest discover -s tests
-```
-
-Un resultado exitoso mostrará algo similar a:
-
-```
-----------------------------------------------------------------------
-Ran 10 tests in 0.00Xs
-
-OK
-```
-
-## Licencia
-
-Este proyecto se distribuye bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
-## Cómo ejecutar el proyecto
-
-### 1. Instalar dependencias
+### 2. Instalar dependencias
 
 ```bash
 pip install "kivy[base]"
 pip install --user kivy
 ```
 
-### 2. Ejecutar la interfaz de consola
+### 3. Ejecutar la interfaz de consola
 
 ```bash
 python -m src.view.console
 ```
 
-### 3. Ejecutar la interfaz gráfica (Kivy)
+### 4. Ejecutar la interfaz gráfica (Kivy)
 
 ```bash
 python -m src.view.gui
 ```
 
-### 4. Ejecutar las pruebas unitarias
+### 5. Ejecutar las pruebas unitarias
 
 ```bash
 python -m unittest discover -s tests
 ```
+
+Un resultado exitoso mostrará algo similar a:
+ 
+```
+----------------------------------------------------------------------
+Ran 10 tests in 0.00Xs
+ 
+OK
+```
+ 
+## Licencia
+ 
+Este proyecto se distribuye bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
