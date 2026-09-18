@@ -124,3 +124,30 @@ OK
 ## Licencia
 
 Este proyecto se distribuye bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+## Cómo ejecutar el proyecto
+
+### 1. Instalar dependencias
+
+```bash
+pip install "kivy[base]"
+pip install --user kivy
+```
+
+### 2. Ejecutar la interfaz de consola
+
+```bash
+python -m src.view.console
+```
+
+### 3. Ejecutar la interfaz gráfica (Kivy)
+
+```bash
+python -m src.view.gui
+```
+
+### 4. Ejecutar las pruebas unitarias
+
+```bash
+python -m unittest discover -s tests
+```
